@@ -1,0 +1,9 @@
+vote:
+  minPlayerPercentage: 0.3
+  cooldownSeconds: 300
+  time:
+    enabled: true
+  weather:
+    enabled: true
+deathCoordinates:
+  enabled: true

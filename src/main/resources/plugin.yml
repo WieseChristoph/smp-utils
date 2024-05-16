@@ -1,0 +1,11 @@
+name: SMPUtils
+version: '${version}'
+main: de.wiese_christoph.smputils.SMPUtils
+api-version: '1.20'
+authors: [Christoph Wiese]
+description: Utility plugin for survival multiplayer.
+commands:
+  vote:
+    description: Vote for the time of day or the weather.
+    usage: /<command> <type> <state>
+    permission: smputils.vote
