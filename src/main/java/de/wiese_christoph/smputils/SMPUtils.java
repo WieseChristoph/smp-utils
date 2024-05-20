@@ -1,7 +1,9 @@
 package de.wiese_christoph.smputils;
 
+import de.wiese_christoph.smputils.commands.DeathInventoryCommand;
 import de.wiese_christoph.smputils.commands.VoteCommand;
 import de.wiese_christoph.smputils.listeners.DeathCoordinatesListener;
+import de.wiese_christoph.smputils.listeners.DeathInventoryListener;
 import de.wiese_christoph.smputils.listeners.VoteListener;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -18,22 +20,51 @@ public final class SMPUtils extends JavaPlugin {
 
         PluginManager pluginManager = this.getServer().getPluginManager();
 
-        VoteCommand voteCommand = new VoteCommand(
-                config.getDouble("vote.minPlayerPercentage"),
-                config.getInt("vote.cooldownSeconds"),
-                config.getBoolean("vote.time.enabled"),
-                config.getBoolean("vote.weather.enabled")
-        );
+        /*
+        *********************
+        * Time/Weather Vote *
+        *********************
+        */
+        boolean timeVoteEnabled = config.getBoolean("vote.time.enabled", true);
+        boolean weatherVoteEnabled = config.getBoolean("vote.weather.enabled", true);
+        double minPlayerVotePercentage = config.getDouble("vote.minPlayerPercentage", 0.33);
+        int voteCooldown = config.getInt("vote.cooldownSeconds", 500);
+
+        VoteCommand voteCommand = new VoteCommand(minPlayerVotePercentage, voteCooldown, timeVoteEnabled, weatherVoteEnabled);
         this.getCommand("vote").setExecutor(voteCommand);
         this.getCommand("vote").setTabCompleter(voteCommand);
 
-        VoteListener voteListener = new VoteListener(voteCommand);
-        pluginManager.registerEvents(voteListener, this);
+        if (timeVoteEnabled || weatherVoteEnabled) {
+            VoteListener voteListener = new VoteListener(voteCommand);
+            pluginManager.registerEvents(voteListener, this);
+        }
 
-        DeathCoordinatesListener deathCoordinatesListener = new DeathCoordinatesListener(
-                config.getBoolean("deathCoordinates.enabled")
-        );
-        pluginManager.registerEvents(deathCoordinatesListener, this);
+        /*
+         *********************
+         * Death Coordinates *
+         *********************
+         */
+        boolean deathCoordinatesEnabled = config.getBoolean("deathCoordinates.enabled", true);
+
+        if (deathCoordinatesEnabled) {
+            DeathCoordinatesListener deathCoordinatesListener = new DeathCoordinatesListener();
+            pluginManager.registerEvents(deathCoordinatesListener, this);
+        }
+
+        /*
+         *******************
+         * Death Inventory *
+         *******************
+         */
+        boolean deathInventoryEnabled = config.getBoolean("deathInventory.enabled", true);
+
+        DeathInventoryCommand deathInventoryCommand = new DeathInventoryCommand(deathInventoryEnabled);
+        this.getCommand("di").setExecutor(deathInventoryCommand);
+
+        if (deathInventoryEnabled) {
+            DeathInventoryListener deathInventoryListener = new DeathInventoryListener(deathInventoryCommand);
+            pluginManager.registerEvents(deathInventoryListener, this);
+        }
     }
 
     @Override

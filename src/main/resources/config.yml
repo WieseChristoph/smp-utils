@@ -7,3 +7,5 @@ vote:
     enabled: true
 deathCoordinates:
   enabled: true
+deathInventory:
+  enabled: true

@@ -9,3 +9,7 @@ commands:
     description: Vote for the time of day or the weather.
     usage: /<command> <type> <state>
     permission: smputils.vote
+  di:
+    description: View your or another player's inventory from before you/they died.
+    usage: /<command> [player]
+    permission: smputils.deathInventory

@@ -16,7 +16,7 @@ public class VoteListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        this.voteCommand.removePlayerFromAllVotes(player);
-        this.voteCommand.checkAllVotePass(player.getWorld());
+        voteCommand.removePlayerFromAllVotes(player);
+        voteCommand.checkAllVotePass(player.getWorld());
     }
 }
