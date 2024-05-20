@@ -21,7 +21,7 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
     private enum TimeVoteState implements VoteState {DAY, NIGHT}
     private enum WeatherVoteState implements  VoteState {CLEAR, RAIN, THUNDER}
 
-    private final HashMap<VoteType, HashMap<VoteState, ArrayList<String>>> votes = new HashMap<>();
+    private final HashMap<VoteType, HashMap<VoteState, ArrayList<UUID>>> votes = new HashMap<>();
 
     private LocalDateTime lastTimeVote;
     private LocalDateTime lastWeatherVote;
@@ -99,14 +99,14 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
         }
 
         // Check if the player already voted for this type. If he voted for another state, remove him.
-        for (Map.Entry<VoteState, ArrayList<String>> entry : votes.get(voteType).entrySet()) {
-            if (entry.getValue().contains(player.getName())) {
+        for (Map.Entry<VoteState, ArrayList<UUID>> entry : votes.get(voteType).entrySet()) {
+            if (entry.getValue().contains(player.getUniqueId())) {
                 if (entry.getKey().equals(voteState)) {
                     player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "You already voted for " + voteState.toString().toLowerCase() + (voteType.equals(VoteType.WEATHER) ? " weather" : " time") + "!");
                     return;
                 }
 
-                entry.getValue().remove(player.getName());
+                entry.getValue().remove(player.getUniqueId());
             }
         }
 
@@ -114,7 +114,7 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
             votes.get(voteType).put(voteState, new ArrayList<>());
         }
 
-        votes.get(voteType).get(voteState).add(player.getName());
+        votes.get(voteType).get(voteState).add(player.getUniqueId());
 
         int onlinePlayers = Bukkit.getOnlinePlayers().size();
         Bukkit.broadcastMessage(SMPUtils.Prefix + ChatColor.GRAY + player.getDisplayName() + ChatColor.GOLD + " has voted for " + voteState.toString().toLowerCase() + (voteType.equals(VoteType.WEATHER) ? " weather" : " time") + "!" + ChatColor.DARK_RED + " (" + votes.get(voteType).get(voteState).size() + "/" + (int)Math.ceil(onlinePlayers * minPlayerPercentage) + ")");
@@ -144,7 +144,7 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
             }
 
             // Clear all votes from this type.
-            for (Map.Entry<VoteState, ArrayList<String>> entry : votes.get(voteType).entrySet()) {
+            for (Map.Entry<VoteState, ArrayList<UUID>> entry : votes.get(voteType).entrySet()) {
                 entry.getValue().clear();
             }
         }
@@ -154,18 +154,18 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
         int onlinePlayers = Bukkit.getOnlinePlayers().size();
         if (onlinePlayers == 0) return;
 
-        for (Map.Entry<VoteType, HashMap<VoteState, ArrayList<String>>> voteTypeEntry : votes.entrySet()) {
-            for (Map.Entry<VoteState, ArrayList<String>> voteStateEntry : voteTypeEntry.getValue().entrySet()) {
+        for (Map.Entry<VoteType, HashMap<VoteState, ArrayList<UUID>>> voteTypeEntry : votes.entrySet()) {
+            for (Map.Entry<VoteState, ArrayList<UUID>> voteStateEntry : voteTypeEntry.getValue().entrySet()) {
                 checkVotePass(voteTypeEntry.getKey(), voteStateEntry.getKey(), world);
             }
         }
     }
 
     public void removePlayerFromAllVotes(Player player) {
-        for (Map.Entry<VoteType, HashMap<VoteState, ArrayList<String>>> voteTypeEntry : votes.entrySet()) {
-            for (Map.Entry<VoteState, ArrayList<String>> voteStateEntry : voteTypeEntry.getValue().entrySet()) {
-                if (voteStateEntry.getValue().contains(player.getName())) {
-                    voteStateEntry.getValue().remove(player.getName());
+        for (Map.Entry<VoteType, HashMap<VoteState, ArrayList<UUID>>> voteTypeEntry : votes.entrySet()) {
+            for (Map.Entry<VoteState, ArrayList<UUID>> voteStateEntry : voteTypeEntry.getValue().entrySet()) {
+                if (voteStateEntry.getValue().contains(player.getUniqueId())) {
+                    voteStateEntry.getValue().remove(player.getUniqueId());
                     break;
                 }
             }

@@ -1,9 +1,11 @@
 package de.wiese_christoph.smputils;
 
 import de.wiese_christoph.smputils.commands.DeathInventoryCommand;
+import de.wiese_christoph.smputils.commands.HomeCommand;
 import de.wiese_christoph.smputils.commands.VoteCommand;
 import de.wiese_christoph.smputils.listeners.DeathCoordinatesListener;
 import de.wiese_christoph.smputils.listeners.DeathInventoryListener;
+import de.wiese_christoph.smputils.listeners.HomeListener;
 import de.wiese_christoph.smputils.listeners.VoteListener;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -64,6 +66,22 @@ public final class SMPUtils extends JavaPlugin {
         if (deathInventoryEnabled) {
             DeathInventoryListener deathInventoryListener = new DeathInventoryListener(deathInventoryCommand);
             pluginManager.registerEvents(deathInventoryListener, this);
+        }
+
+        /*
+         ********
+         * Home *
+         ********
+         */
+        boolean homeEnabled = config.getBoolean("home.enabled", true);
+        int homeTeleportDelay = config.getInt("home.teleportDelaySeconds", 5);
+
+        HomeCommand homeCommand = new HomeCommand(this, homeEnabled, homeTeleportDelay);
+        this.getCommand("home").setExecutor(homeCommand);
+
+        if (homeEnabled) {
+            HomeListener homeListener = new HomeListener(homeCommand);
+            pluginManager.registerEvents(homeListener, this);
         }
     }
 

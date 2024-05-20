@@ -9,3 +9,6 @@ deathCoordinates:
   enabled: true
 deathInventory:
   enabled: true
+home:
+  enabled: true
+  teleportDelaySeconds: 5

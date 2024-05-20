@@ -13,3 +13,7 @@ commands:
     description: View your or another player's inventory from before you/they died.
     usage: /<command> [player]
     permission: smputils.deathInventory
+  home:
+    description: Teleport yourself to your respawn point (bed).
+    usage: /<command>
+    permission: smputils.home

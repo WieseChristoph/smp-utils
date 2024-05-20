@@ -15,7 +15,7 @@ import java.util.*;
 public class DeathInventoryCommand implements CommandExecutor {
     private final boolean deathInventoryEnabled;
     public final String INV_PREFIX = ChatColor.DARK_RED + "Death inventory";
-    private final HashMap<String, ItemStack[]> deathInventories = new HashMap<>();
+    private final HashMap<UUID, ItemStack[]> deathInventories = new HashMap<>();
 
     public DeathInventoryCommand(boolean deathInventoryEnabled) {
         this.deathInventoryEnabled = deathInventoryEnabled;
@@ -57,18 +57,18 @@ public class DeathInventoryCommand implements CommandExecutor {
         Collections.addAll(items, extraContents);
 
         if (!items.isEmpty()) {
-            deathInventories.put(player.getName(), items.toArray(new ItemStack[0]));
+            deathInventories.put(player.getUniqueId(), items.toArray(new ItemStack[0]));
         }
     }
 
     public void showDeathInventory(Player requestPlayer, Player targetPlayer) {
-        if (!deathInventories.containsKey(targetPlayer.getName())) {
+        if (!deathInventories.containsKey(targetPlayer.getUniqueId())) {
             requestPlayer.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "No inventory saved for player '" + targetPlayer.getDisplayName() + "'!");
             return;
         }
 
         Inventory deathInventory = Bukkit.createInventory(null, 45, INV_PREFIX + " of " + targetPlayer.getDisplayName());
-        ItemStack[] deathInventoryItems = deathInventories.get(targetPlayer.getName());
+        ItemStack[] deathInventoryItems = deathInventories.get(targetPlayer.getUniqueId());
         deathInventory.setContents(deathInventoryItems);
 
         requestPlayer.openInventory(deathInventory);
