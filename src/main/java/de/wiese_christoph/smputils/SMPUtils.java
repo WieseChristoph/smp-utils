@@ -2,6 +2,7 @@ package de.wiese_christoph.smputils;
 
 import de.wiese_christoph.smputils.commands.DeathInventoryCommand;
 import de.wiese_christoph.smputils.commands.HomeCommand;
+import de.wiese_christoph.smputils.commands.SuicideCommand;
 import de.wiese_christoph.smputils.commands.VoteCommand;
 import de.wiese_christoph.smputils.listeners.DeathCoordinatesListener;
 import de.wiese_christoph.smputils.listeners.DeathInventoryListener;
@@ -83,6 +84,16 @@ public final class SMPUtils extends JavaPlugin {
             HomeListener homeListener = new HomeListener(homeCommand);
             pluginManager.registerEvents(homeListener, this);
         }
+
+        /*
+         ***********
+         * Suicide *
+         ***********
+         */
+        boolean suicideEnabled = config.getBoolean("suicide.enabled", true);
+
+        SuicideCommand suicideCommand = new SuicideCommand(suicideEnabled);
+        this.getCommand("suicide").setExecutor(suicideCommand);
     }
 
     @Override

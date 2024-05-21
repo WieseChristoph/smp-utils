@@ -8,6 +8,7 @@ A simple and small survival multiplayer server plugin that adds some QOL feature
 - **Death Coordinates**: Shows the coordinates of death to the player who died.
 - **Death Inventory**: Players can view their inventory from before they died. Server operators can also view and retrieve items from other players' death inventories.
 - **Home**: Players can teleport themselves to their respawn point (bed).
+- **Suicide**: Players can kill themselves if necessary.
 
 ## Commands
 
@@ -16,7 +17,7 @@ A simple and small survival multiplayer server plugin that adds some QOL feature
 | /vote \<type\> \<state\> | Vote for the time of day or the weather.                           | smputils.vote           |
 | /di \[player\]           | View your or another player's inventory from before you/they died. | smputils.deathInventory |
 | /home                    | Teleport yourself to your respawn point (bed).                     | smputils.home           |
-
+| /suicide                 | Kill yourself.                                                     | smputils.suicide        |
 
 ## Config
 
@@ -43,4 +44,7 @@ home:
   enabled: true
   # Delay before a player is teleported. The teleport will be canceled if the player moves or is attacked during this timeframe.
   teleportDelaySeconds: 5
+suicide:
+  # Weather to be able to kill yourself.
+  enabled: true
 ```

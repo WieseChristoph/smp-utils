@@ -12,3 +12,5 @@ deathInventory:
 home:
   enabled: true
   teleportDelaySeconds: 5
+suicide:
+  enabled: true

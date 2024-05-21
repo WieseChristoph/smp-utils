@@ -17,3 +17,7 @@ commands:
     description: Teleport yourself to your respawn point (bed).
     usage: /<command>
     permission: smputils.home
+  suicide:
+    description: Kill yourself.
+    usage: /<command>
+    permission: smputils.suicide
