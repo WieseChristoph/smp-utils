@@ -14,3 +14,5 @@ home:
   teleportDelaySeconds: 5
 suicide:
   enabled: true
+randomTeleport:
+  enabled: true

@@ -9,15 +9,17 @@ A simple and small survival multiplayer server plugin that adds some QOL feature
 - **Death Inventory**: Players can view their inventory from before they died. Server operators can also view and retrieve items from other players' death inventories.
 - **Home**: Players can teleport themselves to their respawn point (bed).
 - **Suicide**: Players can kill themselves if necessary.
+- **Random Teleport**: Players can teleport themselves to a random location within a specified range.
 
 ## Commands
 
-| Command                  | Description                                                        | Permission              |
-|--------------------------|--------------------------------------------------------------------|-------------------------|
-| /vote \<type\> \<state\> | Vote for the time of day or the weather.                           | smputils.vote           |
-| /di \[player\]           | View your or another player's inventory from before you/they died. | smputils.deathInventory |
-| /home                    | Teleport yourself to your respawn point (bed).                     | smputils.home           |
-| /suicide                 | Kill yourself.                                                     | smputils.suicide        |
+| Command                              | Description                                                        | Permission              |
+|--------------------------------------|--------------------------------------------------------------------|-------------------------|
+| /vote \<type\> \<state\>             | Vote for the time of day or the weather.                           | smputils.vote           |
+| /di \[player\]                       | View your or another player's inventory from before you/they died. | smputils.deathInventory |
+| /home                                | Teleport yourself to your respawn point (bed).                     | smputils.home           |
+| /suicide                             | Kill yourself.                                                     | smputils.suicide        |
+| /rtp \<minDistance\> \<maxDistance\> | Teleport yourself to a random location within a specified range.   | smputils.randomTeleport |
 
 ## Config
 
@@ -46,5 +48,8 @@ home:
   teleportDelaySeconds: 5
 suicide:
   # Weather to be able to kill yourself.
+  enabled: true
+randomTeleport:
+  # Weather to be able to teleport to a random location.
   enabled: true
 ```

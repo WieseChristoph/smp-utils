@@ -1,9 +1,6 @@
 package de.wiese_christoph.smputils;
 
-import de.wiese_christoph.smputils.commands.DeathInventoryCommand;
-import de.wiese_christoph.smputils.commands.HomeCommand;
-import de.wiese_christoph.smputils.commands.SuicideCommand;
-import de.wiese_christoph.smputils.commands.VoteCommand;
+import de.wiese_christoph.smputils.commands.*;
 import de.wiese_christoph.smputils.listeners.DeathCoordinatesListener;
 import de.wiese_christoph.smputils.listeners.DeathInventoryListener;
 import de.wiese_christoph.smputils.listeners.HomeListener;
@@ -94,6 +91,16 @@ public final class SMPUtils extends JavaPlugin {
 
         SuicideCommand suicideCommand = new SuicideCommand(suicideEnabled);
         this.getCommand("suicide").setExecutor(suicideCommand);
+
+        /*
+         *******************
+         * Random Teleport *
+         *******************
+         */
+        boolean randomTeleportEnabled = config.getBoolean("randomTeleport.enabled", true);
+
+        RandomTeleportCommand randomTeleportCommand = new RandomTeleportCommand(randomTeleportEnabled);
+        this.getCommand("rtp").setExecutor(randomTeleportCommand);
     }
 
     @Override

@@ -21,3 +21,7 @@ commands:
     description: Kill yourself.
     usage: /<command>
     permission: smputils.suicide
+  rtp:
+    description: Teleport yourself to a random location within a specified range.
+    usage: /<command> <minDistance> <maxDistance>
+    permission: smputils.randomTeleport
