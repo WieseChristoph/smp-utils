@@ -10,12 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-public class DeathInventoryListener implements Listener {
-    private final DeathInventoryCommand deathInventoryCommand;
-
-    public DeathInventoryListener(DeathInventoryCommand deathInventoryCommand) {
-        this.deathInventoryCommand = deathInventoryCommand;
-    }
+public record DeathInventoryListener(DeathInventoryCommand deathInventoryCommand) implements Listener {
+    private static final String NO_OP_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "You must be a server operator to move items from a death inventory!";
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
@@ -28,9 +24,9 @@ public class DeathInventoryListener implements Listener {
         HumanEntity player = event.getWhoClicked();
 
         // Prevent non-op players from moving the items in the death inventory
-        if (!player.isOp() && event.getView().getTitle().startsWith(deathInventoryCommand.INV_PREFIX)) {
+        if (!player.isOp() && DeathInventoryCommand.isDeathInventory(event.getView())) {
             event.setCancelled(true);
-            player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "You must be a server operator to move items from a death inventory!");
+            player.sendMessage(NO_OP_MSG);
         }
     }
 }

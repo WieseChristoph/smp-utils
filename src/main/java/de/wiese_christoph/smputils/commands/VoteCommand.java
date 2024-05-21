@@ -21,7 +21,7 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
     private enum TimeVoteState implements VoteState {DAY, NIGHT}
     private enum WeatherVoteState implements  VoteState {CLEAR, RAIN, THUNDER}
 
-    private final HashMap<VoteType, HashMap<VoteState, ArrayList<UUID>>> votes = new HashMap<>();
+    private final Map<VoteType, Map<VoteState, List<UUID>>> votes = new HashMap<>();
 
     private LocalDateTime lastTimeVote;
     private LocalDateTime lastWeatherVote;
@@ -31,11 +31,23 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
     private final boolean timeVoteEnabled;
     private final boolean weatherVoteEnabled;
 
+    private static final String INVALID_VOTE_TYPE_MSG = SMPUtils.Prefix + ChatColor.RED + "Invalid vote type!";
+    private static final String INVALID_VOTE_STATE_MSG = SMPUtils.Prefix + ChatColor.RED + "Invalid vote state!";
+    private static final String VOTE_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "This vote is disabled!";
+    private static final String VOTE_ON_COOLDOWN_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "This vote is on cooldown for %d seconds!";
+    private static final String ALREADY_VOTED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "You already voted for %s %s!";
+    private static final String VOTED_CAST_MSG = SMPUtils.Prefix + ChatColor.GRAY + "%s" + ChatColor.GOLD + " has voted for %s %s!" + ChatColor.DARK_RED + " (%d/%d)";
+    private static final String VOTE_PASSED_MSG = SMPUtils.Prefix + ChatColor.DARK_GREEN + "Enough people voted. Changing %s to %s!";
+
     public VoteCommand(double minPlayerPercentage, int cooldownSeconds, boolean timeVoteEnabled, boolean weatherVoteEnabled) {
         this.minPlayerPercentage = minPlayerPercentage;
         this.cooldownSeconds = cooldownSeconds;
         this.timeVoteEnabled = timeVoteEnabled;
         this.weatherVoteEnabled = weatherVoteEnabled;
+
+        for (VoteType type : VoteType.values()) {
+            votes.put(type, new HashMap<>());
+        }
     }
 
     @Override
@@ -43,16 +55,21 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player player)) return false;
         if (args.length < 2) return false;
 
-        VoteType voteType = VoteType.valueOf(args[0].toUpperCase());
+        VoteType voteType;
         VoteState voteState;
+
         try {
-            voteState = TimeVoteState.valueOf(args[1].toUpperCase());
-        } catch (Exception e) {
-            try {
-                voteState = WeatherVoteState.valueOf(args[1].toUpperCase());
-            } catch (Exception ex) {
-                return false;
-            }
+            voteType = VoteType.valueOf(args[0].toUpperCase());
+        } catch (IllegalArgumentException e) {
+            player.sendMessage(INVALID_VOTE_TYPE_MSG);
+            return false;
+        }
+
+        try {
+            voteState = voteType == VoteType.TIME ? TimeVoteState.valueOf(args[1].toUpperCase()) : WeatherVoteState.valueOf(args[1].toUpperCase());
+        } catch (IllegalArgumentException e) {
+            player.sendMessage(INVALID_VOTE_STATE_MSG);
+            return false;
         }
 
         vote(player, voteType, voteState);
@@ -67,11 +84,15 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
                     .map(String::toLowerCase)
                     .collect(Collectors.toList());
             case 2 -> {
-                VoteType voteType = VoteType.valueOf(args[0].toUpperCase());
-                yield Arrays.stream(voteType.equals(VoteType.TIME) ? TimeVoteState.values() : WeatherVoteState.values())
-                        .map(Enum::name)
-                        .map(String::toLowerCase)
-                        .collect(Collectors.toList());
+                try {
+                    VoteType voteType = VoteType.valueOf(args[0].toUpperCase());
+                    yield Arrays.stream(voteType.equals(VoteType.TIME) ? TimeVoteState.values() : WeatherVoteState.values())
+                            .map(Enum::name)
+                            .map(String::toLowerCase)
+                            .collect(Collectors.toList());
+                } catch (IllegalArgumentException e) {
+                    yield Collections.emptyList();
+                }
             }
             default -> Collections.emptyList();
         };
@@ -80,7 +101,7 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
     private void vote(Player player, VoteType voteType, VoteState voteState) {
         // Check if weather/time vote is disabled.
         if ((voteType.equals(VoteType.TIME) && !timeVoteEnabled) || (voteType.equals(VoteType.WEATHER) && !weatherVoteEnabled)) {
-            player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "This vote is disabled!");
+            player.sendMessage(VOTE_DISABLED_MSG);
             return;
         }
 
@@ -89,20 +110,16 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
         if (lastVote != null) {
             LocalDateTime lastVoteWithCooldown = lastVote.plusSeconds(cooldownSeconds);
             if (LocalDateTime.now().isBefore(lastVoteWithCooldown)) {
-                player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "This vote is on cooldown for " + LocalDateTime.now().until(lastVoteWithCooldown, ChronoUnit.SECONDS) + " Seconds!");
+                player.sendMessage(String.format(VOTE_ON_COOLDOWN_MSG, LocalDateTime.now().until(lastVoteWithCooldown, ChronoUnit.SECONDS)));
                 return;
             }
         }
 
-        if (!votes.containsKey(voteType)) {
-            votes.put(voteType, new HashMap<>());
-        }
-
         // Check if the player already voted for this type. If he voted for another state, remove him.
-        for (Map.Entry<VoteState, ArrayList<UUID>> entry : votes.get(voteType).entrySet()) {
+        for (Map.Entry<VoteState, List<UUID>> entry : votes.get(voteType).entrySet()) {
             if (entry.getValue().contains(player.getUniqueId())) {
                 if (entry.getKey().equals(voteState)) {
-                    player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "You already voted for " + voteState.toString().toLowerCase() + (voteType.equals(VoteType.WEATHER) ? " weather" : " time") + "!");
+                    player.sendMessage(String.format(ALREADY_VOTED_MSG, voteState.toString().toLowerCase(), voteType.toString().toLowerCase()));
                     return;
                 }
 
@@ -117,7 +134,13 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
         votes.get(voteType).get(voteState).add(player.getUniqueId());
 
         int onlinePlayers = Bukkit.getOnlinePlayers().size();
-        Bukkit.broadcastMessage(SMPUtils.Prefix + ChatColor.GRAY + player.getDisplayName() + ChatColor.GOLD + " has voted for " + voteState.toString().toLowerCase() + (voteType.equals(VoteType.WEATHER) ? " weather" : " time") + "!" + ChatColor.DARK_RED + " (" + votes.get(voteType).get(voteState).size() + "/" + (int)Math.ceil(onlinePlayers * minPlayerPercentage) + ")");
+        Bukkit.broadcastMessage(
+            String.format(VOTED_CAST_MSG, player.getDisplayName(),
+            voteState.toString().toLowerCase(),
+            voteType.toString().toLowerCase(),
+            votes.get(voteType).get(voteState).size(),
+            (int) Math.ceil(onlinePlayers * minPlayerPercentage))
+        );
 
         checkVotePass(voteType, voteState, player.getWorld());
     }
@@ -127,7 +150,7 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
         if (onlinePlayers == 0) return;
 
         if (votes.get(voteType).get(voteState).size() >= (onlinePlayers * minPlayerPercentage)) {
-            Bukkit.broadcastMessage(SMPUtils.Prefix + ChatColor.DARK_GREEN + "Enough people voted. Changing " + (voteType.equals(VoteType.TIME) ? "time" : "weather") + " to " + voteState.toString().toLowerCase() + "!");
+            Bukkit.broadcastMessage(String.format(VOTE_PASSED_MSG, voteType.toString().toLowerCase(), voteState.toString().toLowerCase()));
 
             switch (voteType) {
                 case TIME:
@@ -144,9 +167,7 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
             }
 
             // Clear all votes from this type.
-            for (Map.Entry<VoteState, ArrayList<UUID>> entry : votes.get(voteType).entrySet()) {
-                entry.getValue().clear();
-            }
+            votes.get(voteType).values().forEach(List::clear);
         }
     }
 
@@ -154,18 +175,19 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
         int onlinePlayers = Bukkit.getOnlinePlayers().size();
         if (onlinePlayers == 0) return;
 
-        for (Map.Entry<VoteType, HashMap<VoteState, ArrayList<UUID>>> voteTypeEntry : votes.entrySet()) {
-            for (Map.Entry<VoteState, ArrayList<UUID>> voteStateEntry : voteTypeEntry.getValue().entrySet()) {
+        for (Map.Entry<VoteType, Map<VoteState, List<UUID>>> voteTypeEntry : votes.entrySet()) {
+            for (Map.Entry<VoteState, List<UUID>> voteStateEntry : voteTypeEntry.getValue().entrySet()) {
                 checkVotePass(voteTypeEntry.getKey(), voteStateEntry.getKey(), world);
             }
         }
     }
 
     public void removePlayerFromAllVotes(Player player) {
-        for (Map.Entry<VoteType, HashMap<VoteState, ArrayList<UUID>>> voteTypeEntry : votes.entrySet()) {
-            for (Map.Entry<VoteState, ArrayList<UUID>> voteStateEntry : voteTypeEntry.getValue().entrySet()) {
-                if (voteStateEntry.getValue().contains(player.getUniqueId())) {
-                    voteStateEntry.getValue().remove(player.getUniqueId());
+        for (Map.Entry<VoteType, Map<VoteState, List<UUID>>> voteTypeEntry : votes.entrySet()) {
+            for (Map.Entry<VoteState, List<UUID>> voteStateEntry : voteTypeEntry.getValue().entrySet()) {
+                UUID playerId = player.getUniqueId();
+                if (voteStateEntry.getValue().contains(playerId)) {
+                    voteStateEntry.getValue().remove(playerId);
                     break;
                 }
             }

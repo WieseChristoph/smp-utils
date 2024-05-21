@@ -8,14 +8,20 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
 public class DeathInventoryCommand implements CommandExecutor {
     private final boolean deathInventoryEnabled;
-    public final String INV_PREFIX = ChatColor.DARK_RED + "Death inventory";
-    private final HashMap<UUID, ItemStack[]> deathInventories = new HashMap<>();
+    private final Map<UUID, ItemStack[]> deathInventories = new HashMap<>();
+
+    public static final String INVENTORY_PREFIX = ChatColor.DARK_RED + "Death inventory";
+    private static final String DEATH_INVENTORY_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Death inventories are disabled!";
+    private static final String NO_OP_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "You must be a server operator to see the death inventories of other players!";
+    private static final String PLAYER_NOT_FOUND_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "No online player found with this username!";
+    private static final String NO_INVENTORY_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "No inventory saved for player '%s'!";
 
     public DeathInventoryCommand(boolean deathInventoryEnabled) {
         this.deathInventoryEnabled = deathInventoryEnabled;
@@ -25,7 +31,7 @@ public class DeathInventoryCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) return false;
         if (!deathInventoryEnabled) {
-            player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "Death inventories are disabled!");
+            player.sendMessage(DEATH_INVENTORY_DISABLED_MSG);
             return true;
         }
 
@@ -37,10 +43,10 @@ public class DeathInventoryCommand implements CommandExecutor {
                 if (targetPlayer == player || player.isOp()) {
                     showDeathInventory(player, targetPlayer);
                 } else {
-                    player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "You must be a server operator to see the death inventories of other players!");
+                    player.sendMessage(NO_OP_MSG);
                 }
             } else {
-                player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "No online player found with this username!");
+                player.sendMessage(PLAYER_NOT_FOUND_MSG);
             }
         } else return false;
 
@@ -63,14 +69,18 @@ public class DeathInventoryCommand implements CommandExecutor {
 
     public void showDeathInventory(Player requestPlayer, Player targetPlayer) {
         if (!deathInventories.containsKey(targetPlayer.getUniqueId())) {
-            requestPlayer.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "No inventory saved for player '" + targetPlayer.getDisplayName() + "'!");
+            requestPlayer.sendMessage(String.format(NO_INVENTORY_MSG_FORMAT, targetPlayer.getDisplayName()));
             return;
         }
 
-        Inventory deathInventory = Bukkit.createInventory(null, 45, INV_PREFIX + " of " + targetPlayer.getDisplayName());
+        Inventory deathInventory = Bukkit.createInventory(null, 45, INVENTORY_PREFIX + " of " + targetPlayer.getDisplayName());
         ItemStack[] deathInventoryItems = deathInventories.get(targetPlayer.getUniqueId());
         deathInventory.setContents(deathInventoryItems);
 
         requestPlayer.openInventory(deathInventory);
+    }
+
+    public static boolean isDeathInventory(InventoryView inventoryView) {
+        return inventoryView.getTitle().startsWith(INVENTORY_PREFIX);
     }
 }

@@ -10,11 +10,24 @@ import org.bukkit.entity.Player;
 import java.util.Random;
 
 public record RandomTeleportCommand(boolean randomTeleportEnabled) implements CommandExecutor {
+    private static final String RANDOM_TELEPORT_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Random teleport is disabled!";
+    private static final String INVALID_DISTANCE_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Invalid distance!";
+    private static final String SAME_MIN_MAX_DISTANCE_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The minimum distance can't be the same as the maximum distance!";
+    private static final String MIN_GREATER_THAN_MAX_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The minimum distance can't be greater than the maximum distance!";
+    private static final String MAX_DISTANCE_WORLD_BORDER_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The maximum distance is too high and intersects with the world border!";
+    private static final String TELEPORT_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GOLD + "Teleporting to (" +
+            ChatColor.RED + "X" + ChatColor.GOLD + ", " +
+            ChatColor.GREEN + "Y" + ChatColor.GOLD + ", " +
+            ChatColor.BLUE + "Z" + ChatColor.GOLD + "): " +
+            ChatColor.RED + "%.2f " +
+            ChatColor.GREEN + "%.2f " +
+            ChatColor.BLUE + "%.2f";
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) return false;
         if (!randomTeleportEnabled) {
-            player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "Random teleport is disabled!");
+            player.sendMessage(RANDOM_TELEPORT_DISABLED_MSG);
             return true;
         }
         if (args.length != 2) return false;
@@ -25,57 +38,52 @@ public record RandomTeleportCommand(boolean randomTeleportEnabled) implements Co
             minDistance = Math.abs(Double.parseDouble(args[0]));
             maxDistance = Math.abs(Double.parseDouble(args[1]));
         } catch (NumberFormatException exception) {
-            player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "Invalid distance!");
+            player.sendMessage(INVALID_DISTANCE_MSG);
             return false;
         }
 
         if (minDistance == maxDistance) {
-            player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "The minimum distance cant be the same as the maximum distance!");
+            player.sendMessage(SAME_MIN_MAX_DISTANCE_MSG);
             return false;
         }
 
         if (minDistance > maxDistance) {
-            player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "The minimum distance cant be greater than the maximum distance!");
+            player.sendMessage(MIN_GREATER_THAN_MAX_MSG);
             return false;
         }
 
         World world = player.getWorld();
-        WorldBorder worldBorder = world.getWorldBorder();
-        double worldBorderMinX = worldBorder.getCenter().getX() - (worldBorder.getSize() / 2);
-        double worldBorderMaxX = worldBorder.getCenter().getX() + (worldBorder.getSize() / 2);
-        double worldBorderMinZ = worldBorder.getCenter().getZ() - (worldBorder.getSize() / 2);
-        double worldBorderMaxZ = worldBorder.getCenter().getZ() + (worldBorder.getSize() / 2);
-
         Location playerLocation = player.getLocation();
-        if (playerLocation.getX() + maxDistance >= worldBorderMaxX ||
-                playerLocation.getX() - maxDistance <= worldBorderMinX ||
-                playerLocation.getZ() + maxDistance >= worldBorderMaxZ ||
-                playerLocation.getZ() - maxDistance <= worldBorderMinZ
-        ) {
-            player.sendMessage(SMPUtils.Prefix + ChatColor.DARK_RED + "The maximum distance is too high and intersects with the world border!");
+        if (!isWithinWorldBorder(playerLocation, maxDistance, world)) {
+            player.sendMessage(MAX_DISTANCE_WORLD_BORDER_MSG);
             return false;
         }
 
-        // Get random location.
-        double randomX = randomDoubleInRangeWithMinDistanceFromCenter(playerLocation.getX() - maxDistance, playerLocation.getX() + maxDistance, minDistance);
-        double randomZ = randomDoubleInRangeWithMinDistanceFromCenter(playerLocation.getZ() - maxDistance, playerLocation.getZ() + maxDistance, minDistance);
-        Location randomLocation = new Location(world, randomX, world.getHighestBlockYAt((int) randomX, (int) randomZ) + 1, randomZ);
-
-        // Generate chunk at random location.
-        Chunk randomLocationChunk = world.getChunkAt(randomLocation);
-        world.loadChunk(randomLocationChunk);
-
-        player.sendMessage(String.format(SMPUtils.Prefix + ChatColor.GOLD + "Teleporting to (" + ChatColor.RED + "X" + ChatColor.GREEN + "Y" + ChatColor.BLUE + "Z" + ChatColor.GOLD + "): " + ChatColor.RED + "%.2f " + ChatColor.GREEN + "%.2f " + ChatColor.BLUE + "%.2f", randomLocation.getX(), randomLocation.getY(), randomLocation.getZ()));
+        Location randomLocation = generateRandomLocation(playerLocation, minDistance, maxDistance, world);
+        player.sendMessage(String.format(TELEPORT_MSG_FORMAT, randomLocation.getX(), randomLocation.getY(), randomLocation.getZ()));
         player.teleport(randomLocation);
 
         return true;
     }
 
-    private double randomDoubleInRangeWithMinDistanceFromCenter(double min, double max, double minDistanceFromCenter) {
-        if (min > max) throw new IllegalArgumentException("No valid range exists with the given constraints.");
-        if (minDistanceFromCenter < 0)
-            throw new IllegalArgumentException("Minimum distance from zero must be non-negative.");
+    private boolean isWithinWorldBorder(Location location, double distance, World world) {
+        WorldBorder worldBorder = world.getWorldBorder();
+        double minX = worldBorder.getCenter().getX() - (worldBorder.getSize() / 2);
+        double maxX = worldBorder.getCenter().getX() + (worldBorder.getSize() / 2);
+        double minZ = worldBorder.getCenter().getZ() - (worldBorder.getSize() / 2);
+        double maxZ = worldBorder.getCenter().getZ() + (worldBorder.getSize() / 2);
 
+        return location.getX() + distance < maxX && location.getX() - distance > minX &&
+                location.getZ() + distance < maxZ && location.getZ() - distance > minZ;
+    }
+
+    private Location generateRandomLocation(Location playerLocation, double minDistance, double maxDistance, World world) {
+        double randomX = randomDoubleInRangeWithMinDistanceFromCenter(playerLocation.getX() - maxDistance, playerLocation.getX() + maxDistance, minDistance);
+        double randomZ = randomDoubleInRangeWithMinDistanceFromCenter(playerLocation.getZ() - maxDistance, playerLocation.getZ() + maxDistance, minDistance);
+        return new Location(world, randomX, world.getHighestBlockYAt((int) randomX, (int) randomZ) + 1, randomZ);
+    }
+
+    private double randomDoubleInRangeWithMinDistanceFromCenter(double min, double max, double minDistanceFromCenter) {
         double center = (min + max) / 2;
 
         if (center + minDistanceFromCenter >= max || center - minDistanceFromCenter <= min)

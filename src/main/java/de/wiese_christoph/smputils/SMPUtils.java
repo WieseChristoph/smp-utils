@@ -3,7 +3,6 @@ package de.wiese_christoph.smputils;
 import de.wiese_christoph.smputils.commands.*;
 import de.wiese_christoph.smputils.listeners.DeathCoordinatesListener;
 import de.wiese_christoph.smputils.listeners.DeathInventoryListener;
-import de.wiese_christoph.smputils.listeners.HomeListener;
 import de.wiese_christoph.smputils.listeners.VoteListener;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -78,8 +77,7 @@ public final class SMPUtils extends JavaPlugin {
         this.getCommand("home").setExecutor(homeCommand);
 
         if (homeEnabled) {
-            HomeListener homeListener = new HomeListener(homeCommand);
-            pluginManager.registerEvents(homeListener, this);
+            pluginManager.registerEvents(homeCommand, this);
         }
 
         /*

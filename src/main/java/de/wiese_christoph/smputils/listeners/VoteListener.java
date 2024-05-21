@@ -6,13 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class VoteListener implements Listener {
-    private final VoteCommand voteCommand;
-
-    public VoteListener(VoteCommand voteCommand) {
-        this.voteCommand = voteCommand;
-    }
-
+public record VoteListener(VoteCommand voteCommand) implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
