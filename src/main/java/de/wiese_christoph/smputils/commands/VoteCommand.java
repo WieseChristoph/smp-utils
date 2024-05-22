@@ -1,6 +1,10 @@
 package de.wiese_christoph.smputils.commands;
 
 import de.wiese_christoph.smputils.SMPUtils;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -131,14 +135,29 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
                 .computeIfAbsent(voteState, k -> new ArrayList<>())
                 .add(player.getUniqueId());
 
+        // === Create vote message with clickable vote button ===
         int onlinePlayers = Bukkit.getOnlinePlayers().size();
-        Bukkit.broadcastMessage(
-            String.format(VOTED_CAST_MSG_FORMAT, player.getDisplayName(),
-            voteState.toString().toLowerCase(),
-            voteType.toString().toLowerCase(),
-            votes.get(voteType).get(voteState).size(),
-            (int) Math.ceil(onlinePlayers * minPlayerPercentage))
+        TextComponent voteMessage = new TextComponent(String.format(
+                VOTED_CAST_MSG_FORMAT, player.getDisplayName(),
+                voteState.toString().toLowerCase(),
+                voteType.toString().toLowerCase(),
+                votes.get(voteType).get(voteState).size(),
+                (int) Math.ceil(onlinePlayers * minPlayerPercentage)
+        ) + " - ");
+
+        TextComponent clickToVoteMessage = new TextComponent("VOTE");
+        clickToVoteMessage.setColor(ChatColor.DARK_GREEN.asBungee());
+        clickToVoteMessage.setUnderlined(true);
+        clickToVoteMessage.setBold(true);
+        clickToVoteMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/vote " + voteType + " " + voteState));
+        clickToVoteMessage.setHoverEvent(
+                new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        new Text("Vote for " + voteState.toString().toLowerCase() + " " + voteType.toString().toLowerCase() + ".")
+                )
         );
+        player.getServer().spigot().broadcast(voteMessage, clickToVoteMessage);
+        // === End of vote message ===
 
         checkVotePass(voteType, voteState, player.getWorld());
     }

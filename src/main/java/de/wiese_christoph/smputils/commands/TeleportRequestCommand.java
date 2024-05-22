@@ -1,6 +1,8 @@
 package de.wiese_christoph.smputils.commands;
 
 import de.wiese_christoph.smputils.SMPUtils;
+import net.md_5.bungee.api.chat.*;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -22,10 +24,10 @@ public class TeleportRequestCommand implements CommandExecutor {
     private static final String NO_OPEN_TELEPORT_REQUEST_TO_PLAYER_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "You do not have an open teleport request to " + ChatColor.GRAY + "%s" + ChatColor.GOLD + ".";
     private static final String NO_OPEN_TELEPORT_REQUEST_FROM_PLAYER_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "You do not have an open teleport request from " + ChatColor.GRAY + "%s" + ChatColor.GOLD + ".";
 
-    private static final String REQUEST_ALREADY_SENT_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "You already sent a teleport request to " + ChatColor.GRAY + "%s" + ChatColor.GOLD + ". You can cancel the request with /tpacancel %<s.";
+    private static final String REQUEST_ALREADY_SENT_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "You already sent a teleport request to " + ChatColor.GRAY + "%s" + ChatColor.GOLD + ".";
     private static final String SENT_TELEPORT_REQUEST_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GOLD + "Sent teleport request to " + ChatColor.GRAY + "%s" + ChatColor.GOLD + ".";
-    private static final String RECEIVED_TELEPORT_REQUEST_NORMAL_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GRAY + "%s" + ChatColor.GOLD + " has sent a request to teleport to you. Use /tpaccept %<s to accept it.";
-    private static final String RECEIVED_TELEPORT_REQUEST_HERE_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GRAY + "%s" + ChatColor.GOLD + " has sent a request to teleport to them. Use /tpaccept %<s to accept it.";
+    private static final String RECEIVED_TELEPORT_REQUEST_NORMAL_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GRAY + "%s" + ChatColor.GOLD + " has sent a request to teleport to you.";
+    private static final String RECEIVED_TELEPORT_REQUEST_HERE_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GRAY + "%s" + ChatColor.GOLD + " has sent a request to teleport to them.";
 
     private static final String TELEPORT_REQUEST_CANCELED_SENDER_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GOLD + "Teleport request to " + ChatColor.GRAY + "%s" + ChatColor.GOLD + " has been canceled.";
     private static final String TELEPORT_REQUEST_CANCELED_RECEIVER_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GRAY + "%s" + ChatColor.GOLD + " has canceled the teleport request.";
@@ -108,14 +110,39 @@ public class TeleportRequestCommand implements CommandExecutor {
         targetPlayerRequests.put(player.getUniqueId(), teleportRequestType);
 
         player.sendMessage(String.format(SENT_TELEPORT_REQUEST_MSG_FORMAT, targetPlayer.getDisplayName()));
-        targetPlayer.sendMessage(
-                String.format(
-                        teleportRequestType.equals(TeleportRequestType.NORMAL)
-                                ? RECEIVED_TELEPORT_REQUEST_NORMAL_MSG_FORMAT
-                                : RECEIVED_TELEPORT_REQUEST_HERE_MSG_FORMAT,
-                        player.getDisplayName()
-                )
+
+        // === Create request received message with clickable accept and deny buttons ===
+        TextComponent receivedTeleportRequestMessage = new TextComponent(String.format(
+                teleportRequestType.equals(TeleportRequestType.NORMAL)
+                        ? RECEIVED_TELEPORT_REQUEST_NORMAL_MSG_FORMAT
+                        : RECEIVED_TELEPORT_REQUEST_HERE_MSG_FORMAT,
+                player.getDisplayName()
+        ) + " - ");
+
+        TextComponent acceptMessage = new TextComponent("Accept");
+        acceptMessage.setColor(ChatColor.DARK_GREEN.asBungee());
+        acceptMessage.setUnderlined(true);
+        acceptMessage.setBold(true);
+        acceptMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept " + player.getName()));
+        acceptMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Accept the teleport request")));
+
+        TextComponent denyMessage = new TextComponent("Deny");
+        denyMessage.setColor(ChatColor.DARK_RED.asBungee());
+        denyMessage.setUnderlined(true);
+        denyMessage.setBold(true);
+        denyMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny " + player.getName()));
+        denyMessage.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Deny the teleport request")));
+
+        TextComponent divider = new TextComponent("/");
+        divider.setColor(ChatColor.GOLD.asBungee());
+
+        targetPlayer.spigot().sendMessage(
+                receivedTeleportRequestMessage,
+                acceptMessage,
+                divider,
+                denyMessage
         );
+        // === End of request received message ===
     }
 
     private void teleportAskCancel(Player player, Player targetPlayer) {
