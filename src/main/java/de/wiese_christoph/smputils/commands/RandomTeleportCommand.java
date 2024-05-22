@@ -10,11 +10,11 @@ import org.bukkit.entity.Player;
 import java.util.Random;
 
 public record RandomTeleportCommand(boolean randomTeleportEnabled) implements CommandExecutor {
-    private static final String RANDOM_TELEPORT_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Random teleport is disabled!";
-    private static final String INVALID_DISTANCE_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Invalid distance!";
-    private static final String SAME_MIN_MAX_DISTANCE_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The minimum distance can't be the same as the maximum distance!";
-    private static final String MIN_GREATER_THAN_MAX_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The minimum distance can't be greater than the maximum distance!";
-    private static final String MAX_DISTANCE_WORLD_BORDER_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The maximum distance is too high and intersects with the world border!";
+    private static final String RANDOM_TELEPORT_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Random teleport is disabled.";
+    private static final String INVALID_DISTANCE_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Invalid distance.";
+    private static final String SAME_MIN_MAX_DISTANCE_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The minimum distance can't be the same as the maximum distance.";
+    private static final String MIN_GREATER_THAN_MAX_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The minimum distance can't be greater than the maximum distance.";
+    private static final String MAX_DISTANCE_WORLD_BORDER_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The maximum distance is too high and intersects with the world border.";
     private static final String TELEPORT_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GOLD + "Teleporting to (" +
             ChatColor.RED + "X" + ChatColor.GOLD + ", " +
             ChatColor.GREEN + "Y" + ChatColor.GOLD + ", " +

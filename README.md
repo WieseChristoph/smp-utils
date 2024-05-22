@@ -10,16 +10,22 @@ A simple and small survival multiplayer server plugin that adds some QOL feature
 - **Home**: Players can teleport themselves to their respawn point (bed).
 - **Suicide**: Players can kill themselves if necessary.
 - **Random Teleport**: Players can teleport themselves to a random location within a specified range.
+- **Teleport Request**: Players can request to teleport to other players or request that they teleport to them.
 
 ## Commands
 
-| Command                              | Description                                                        | Permission              |
-|--------------------------------------|--------------------------------------------------------------------|-------------------------|
-| /vote \<type\> \<state\>             | Vote for the time of day or the weather.                           | smputils.vote           |
-| /di \[player\]                       | View your or another player's inventory from before you/they died. | smputils.deathInventory |
-| /home                                | Teleport yourself to your respawn point (bed).                     | smputils.home           |
-| /suicide                             | Kill yourself.                                                     | smputils.suicide        |
-| /rtp \<minDistance\> \<maxDistance\> | Teleport yourself to a random location within a specified range.   | smputils.randomTeleport |
+| Command                              | Description                                                                       | Permission                 |
+|--------------------------------------|-----------------------------------------------------------------------------------|----------------------------|
+| /vote \<type\> \<state\>             | Vote for the time of day or the weather.                                          | smputils.vote              |
+| /di \[player\]                       | View your or another player's inventory from before you/they died.                | smputils.deathInventory    |
+| /home                                | Teleport yourself to your respawn point (bed).                                    | smputils.home              |
+| /suicide                             | Kill yourself.                                                                    | smputils.suicide           |
+| /rtp \<minDistance\> \<maxDistance\> | Teleport yourself to a random location within a specified range.                  | smputils.randomTeleport    |
+| /tpa \<player\>                      | Request to teleport to the specified player.                                      | smputils.teleportAsk       |
+| /tpahere \<player\>                  | Request that the specified player teleport to you.                                | smputils.teleportAskHere   |
+| /tpacancel \[player\|*\]             | Cancel all open teleport requests. Specify a player to cancel requests with them. | smputils.teleportAskCancel |
+| /tpaccept \[player\|*\]              | Accepts teleport requests.                                                        | smputils.teleportAccept    |
+| /tpdeny  \[player\|*\]               | Rejects teleport requests.                                                        | smputils.teleportDeny      |
 
 ## Config
 
@@ -51,5 +57,8 @@ suicide:
   enabled: true
 randomTeleport:
   # Weather to be able to teleport to a random location.
+  enabled: true
+teleportRequest:
+  # Weather to be able to request to teleport to other players or request that they teleport to you.
   enabled: true
 ```

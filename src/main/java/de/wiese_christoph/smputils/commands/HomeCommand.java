@@ -14,13 +14,13 @@ public class HomeCommand extends PlayerIdleTask implements CommandExecutor {
     private final boolean homeEnabled;
     private final int teleportDelaySeconds;
 
-    private static final String HOME_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The /home command is disabled!";
-    private static final String INVALID_LOCATION_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Your respawn location is invalid or not set! (You can set it at a bed)";
+    private static final String HOME_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "The /home command is disabled.";
+    private static final String INVALID_LOCATION_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Your respawn location is invalid or not set. (You can set it at a bed)";
     private static final String TELEPORT_DELAY_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GOLD + "Teleporting in %d seconds.";
-    private static final String TELEPORT_IMMEDIATE_MSG = SMPUtils.Prefix + ChatColor.GOLD + "Teleporting home...";
-    private static final String TELEPORT_ALREADY_IN_PROGRESS_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Teleport already in progress!";
-    private static final String TELEPORT_FINISH_MSG = SMPUtils.Prefix + ChatColor.DARK_GREEN + "Successfully teleported home!";
-    private static final String CANCEL_REASON_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "Teleport was canceled because you %s!";
+    private static final String TELEPORT_IMMEDIATE_MSG = SMPUtils.Prefix + ChatColor.DARK_GREEN + "Teleporting home...";
+    private static final String TELEPORT_ALREADY_IN_PROGRESS_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Teleport already in progress.";
+    private static final String TELEPORT_FINISH_MSG = SMPUtils.Prefix + ChatColor.DARK_GREEN + "Successfully teleported home.";
+    private static final String CANCEL_REASON_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "Teleport was canceled because you %s.";
 
     public HomeCommand(SMPUtils plugin, boolean homeEnabled, int teleportDelaySeconds) {
         super(plugin, false);
@@ -44,7 +44,6 @@ public class HomeCommand extends PlayerIdleTask implements CommandExecutor {
 
         if (teleportDelaySeconds > 0) {
             Runnable commandRunnable = () -> player.teleport(respawnLocation);
-
             try {
                 addTask(player, commandRunnable, teleportDelaySeconds);
                 player.sendMessage(String.format(TELEPORT_DELAY_MSG_FORMAT, teleportDelaySeconds));

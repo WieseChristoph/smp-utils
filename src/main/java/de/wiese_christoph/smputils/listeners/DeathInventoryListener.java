@@ -11,7 +11,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 public record DeathInventoryListener(DeathInventoryCommand deathInventoryCommand) implements Listener {
-    private static final String NO_OP_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "You must be a server operator to move items from a death inventory!";
+    private static final String NO_OP_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "You must be a server operator to move items from a death inventory.";
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {

@@ -25,3 +25,23 @@ commands:
     description: Teleport yourself to a random location within a specified range.
     usage: /<command> <minDistance> <maxDistance>
     permission: smputils.randomTeleport
+  tpa:
+    description: Request to teleport to the specified player.
+    usage: /<command> <player>
+    permission: smputils.teleportAsk
+  tpahere:
+    description: Request that the specified player teleport to you.
+    usage: /<command> <player>
+    permission: smputils.teleportAskHere
+  tpacancel:
+    description: Cancel all outstanding teleport requests. Specify a player to cancel requests with them.
+    usage: /<command> [player|*]
+    permission: smputils.teleportAskCancel
+  tpaccept:
+    description: Accepts teleport requests.
+    usage: /<command> [player|*]
+    permission: smputils.teleportAccept
+  tpdeny:
+    description: Rejects teleport requests.
+    usage: /<command> [player|*]
+    permission: smputils.teleportDeny

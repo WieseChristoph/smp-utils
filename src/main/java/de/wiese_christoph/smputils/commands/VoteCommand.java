@@ -31,13 +31,13 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
     private final boolean timeVoteEnabled;
     private final boolean weatherVoteEnabled;
 
-    private static final String INVALID_VOTE_TYPE_MSG = SMPUtils.Prefix + ChatColor.RED + "Invalid vote type!";
-    private static final String INVALID_VOTE_STATE_MSG = SMPUtils.Prefix + ChatColor.RED + "Invalid vote state!";
-    private static final String VOTE_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "This vote is disabled!";
-    private static final String VOTE_ON_COOLDOWN_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "This vote is on cooldown for %d seconds!";
-    private static final String ALREADY_VOTED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "You already voted for %s %s!";
-    private static final String VOTED_CAST_MSG = SMPUtils.Prefix + ChatColor.GRAY + "%s" + ChatColor.GOLD + " has voted for %s %s!" + ChatColor.DARK_RED + " (%d/%d)";
-    private static final String VOTE_PASSED_MSG = SMPUtils.Prefix + ChatColor.DARK_GREEN + "Enough people voted. Changing %s to %s!";
+    private static final String INVALID_VOTE_TYPE_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Invalid vote type.";
+    private static final String INVALID_VOTE_STATE_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Invalid vote state.";
+    private static final String VOTE_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "This vote is disabled.";
+    private static final String VOTE_ON_COOLDOWN_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "This vote is on cooldown for %d seconds.";
+    private static final String ALREADY_VOTED_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "You already voted for %s %s.";
+    private static final String VOTED_CAST_MSG_FORMAT = SMPUtils.Prefix + ChatColor.GRAY + "%s" + ChatColor.GOLD + " has voted for %s %s." + ChatColor.GOLD + " (%d/%d)";
+    private static final String VOTE_PASSED_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_GREEN + "Enough people voted. Changing %s to %s.";
 
     public VoteCommand(double minPlayerPercentage, int cooldownSeconds, boolean timeVoteEnabled, boolean weatherVoteEnabled) {
         this.minPlayerPercentage = minPlayerPercentage;
@@ -110,7 +110,7 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
         if (lastVote != null) {
             LocalDateTime lastVoteWithCooldown = lastVote.plusSeconds(cooldownSeconds);
             if (LocalDateTime.now().isBefore(lastVoteWithCooldown)) {
-                player.sendMessage(String.format(VOTE_ON_COOLDOWN_MSG, LocalDateTime.now().until(lastVoteWithCooldown, ChronoUnit.SECONDS)));
+                player.sendMessage(String.format(VOTE_ON_COOLDOWN_MSG_FORMAT, LocalDateTime.now().until(lastVoteWithCooldown, ChronoUnit.SECONDS)));
                 return;
             }
         }
@@ -119,7 +119,7 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
         for (Map.Entry<VoteState, List<UUID>> entry : votes.get(voteType).entrySet()) {
             if (entry.getValue().contains(player.getUniqueId())) {
                 if (entry.getKey().equals(voteState)) {
-                    player.sendMessage(String.format(ALREADY_VOTED_MSG, voteState.toString().toLowerCase(), voteType.toString().toLowerCase()));
+                    player.sendMessage(String.format(ALREADY_VOTED_MSG_FORMAT, voteState.toString().toLowerCase(), voteType.toString().toLowerCase()));
                     return;
                 }
 
@@ -127,15 +127,13 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        if (!votes.get(voteType).containsKey(voteState)) {
-            votes.get(voteType).put(voteState, new ArrayList<>());
-        }
-
-        votes.get(voteType).get(voteState).add(player.getUniqueId());
+        votes.get(voteType)
+                .computeIfAbsent(voteState, k -> new ArrayList<>())
+                .add(player.getUniqueId());
 
         int onlinePlayers = Bukkit.getOnlinePlayers().size();
         Bukkit.broadcastMessage(
-            String.format(VOTED_CAST_MSG, player.getDisplayName(),
+            String.format(VOTED_CAST_MSG_FORMAT, player.getDisplayName(),
             voteState.toString().toLowerCase(),
             voteType.toString().toLowerCase(),
             votes.get(voteType).get(voteState).size(),
@@ -150,7 +148,7 @@ public class VoteCommand implements CommandExecutor, TabCompleter {
         if (onlinePlayers == 0) return;
 
         if (votes.get(voteType).get(voteState).size() >= (onlinePlayers * minPlayerPercentage)) {
-            Bukkit.broadcastMessage(String.format(VOTE_PASSED_MSG, voteType.toString().toLowerCase(), voteState.toString().toLowerCase()));
+            Bukkit.broadcastMessage(String.format(VOTE_PASSED_MSG_FORMAT, voteType.toString().toLowerCase(), voteState.toString().toLowerCase()));
 
             switch (voteType) {
                 case TIME:

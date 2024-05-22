@@ -16,12 +16,12 @@ import java.util.*;
 public class DeathInventoryCommand implements CommandExecutor {
     private final boolean deathInventoryEnabled;
     private final Map<UUID, ItemStack[]> deathInventories = new HashMap<>();
-
     public static final String INVENTORY_PREFIX = ChatColor.DARK_RED + "Death inventory";
-    private static final String DEATH_INVENTORY_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Death inventories are disabled!";
-    private static final String NO_OP_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "You must be a server operator to see the death inventories of other players!";
-    private static final String PLAYER_NOT_FOUND_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "No online player found with this username!";
-    private static final String NO_INVENTORY_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "No inventory saved for player '%s'!";
+
+    private static final String DEATH_INVENTORY_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Death inventories are disabled.";
+    private static final String NO_OP_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "You must be a server operator to see the death inventories of other players.";
+    private static final String PLAYER_NOT_FOUND_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "No online player found with this username.";
+    private static final String NO_INVENTORY_MSG_FORMAT = SMPUtils.Prefix + ChatColor.DARK_RED + "No inventory saved for player '" + ChatColor.GRAY + "%s" + ChatColor.DARK_RED + "'.";
 
     public DeathInventoryCommand(boolean deathInventoryEnabled) {
         this.deathInventoryEnabled = deathInventoryEnabled;

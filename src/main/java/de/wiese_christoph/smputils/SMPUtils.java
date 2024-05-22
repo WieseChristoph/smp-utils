@@ -99,6 +99,20 @@ public final class SMPUtils extends JavaPlugin {
 
         RandomTeleportCommand randomTeleportCommand = new RandomTeleportCommand(randomTeleportEnabled);
         this.getCommand("rtp").setExecutor(randomTeleportCommand);
+
+        /*
+         *********************
+         * Teleport Requests *
+         *********************
+         */
+        boolean teleportRequestEnabled = config.getBoolean("teleportRequest.enabled", true);
+
+        TeleportRequestCommand teleportRequestCommand = new TeleportRequestCommand(teleportRequestEnabled);
+        this.getCommand("tpa").setExecutor(teleportRequestCommand);
+        this.getCommand("tpahere").setExecutor(teleportRequestCommand);
+        this.getCommand("tpacancel").setExecutor(teleportRequestCommand);
+        this.getCommand("tpaccept").setExecutor(teleportRequestCommand);
+        this.getCommand("tpdeny").setExecutor(teleportRequestCommand);
     }
 
     @Override

@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public record SuicideCommand(boolean suicideEnabled) implements CommandExecutor {
-    private static final String SUICIDE_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Suicide is disabled!";
+    private static final String SUICIDE_DISABLED_MSG = SMPUtils.Prefix + ChatColor.DARK_RED + "Suicide is disabled.";
     private static final String SUICIDE_SUCCESS_MSG = SMPUtils.Prefix + ChatColor.DARK_GREEN + "You have ended your own life.";
     private static final String ALREADY_DEAD_MSG = SMPUtils.Prefix + ChatColor.RED + "You are already dead.";
 

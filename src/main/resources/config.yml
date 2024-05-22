@@ -16,3 +16,5 @@ suicide:
   enabled: true
 randomTeleport:
   enabled: true
+teleportRequest:
+  enabled: true
