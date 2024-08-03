@@ -70,6 +70,7 @@ public class HomeCommand extends PlayerIdleTask implements CommandExecutor {
         switch (cancelReason) {
             case Movement -> reason = "moved";
             case Damage -> reason = "took damage";
+            case Interaction -> reason = "interacted/attacked";
             case Overwrite -> reason = "executed the command again";
             default -> reason = "unknown reason";
         }

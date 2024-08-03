@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -23,6 +24,7 @@ public abstract class PlayerIdleTask implements Listener {
     public enum CancelReason {
         Movement,
         Damage,
+        Interaction,
         Overwrite
     }
 
@@ -107,7 +109,7 @@ public abstract class PlayerIdleTask implements Listener {
         if (
             tasks.containsKey(player.getUniqueId())
             && event.getTo() != null
-            && event.getFrom().getBlock().equals(event.getTo().getBlock())
+            && !event.getFrom().getBlock().equals(event.getTo().getBlock())
         ) {
             cancelTask(player.getUniqueId());
             onTaskCanceled(player, CancelReason.Movement);
@@ -123,6 +125,17 @@ public abstract class PlayerIdleTask implements Listener {
                 cancelTask(playerID);
                 onTaskCanceled(player, CancelReason.Damage);
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        UUID playerID = player.getUniqueId();
+
+        if (tasks.containsKey(playerID)) {
+            cancelTask(playerID);
+            onTaskCanceled(player, CancelReason.Interaction);
         }
     }
 }
