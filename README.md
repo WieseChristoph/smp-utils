@@ -48,17 +48,17 @@ deathInventory:
   # Whether to be able to view the inventory from before your or another player's death.
   enabled: true
 home:
-  # Weather to be able to teleport yourself to your respawn point.
+  # Whether to be able to teleport yourself to your respawn point.
   enabled: true
   # Delay before a player is teleported. The teleport will be canceled if the player moves or is attacked during this timeframe.
   teleportDelaySeconds: 5
 suicide:
-  # Weather to be able to kill yourself.
+  # Whether to be able to kill yourself.
   enabled: true
 randomTeleport:
-  # Weather to be able to teleport to a random location.
+  # Whether to be able to teleport to a random location.
   enabled: true
 teleportRequest:
-  # Weather to be able to request to teleport to other players or request that they teleport to you.
+  # Whether to be able to request to teleport to other players or request that they teleport to you.
   enabled: true
 ```
